@@ -8,7 +8,7 @@ static void showUsage(std::string name);
 
 void setOutpointData(std::string& txidHexString, std::optional<uint32_t>& vout);
 
-enum class Mode { single, dump_all };
+enum class Mode { single, dump_all, probe_standard };
 
 int main(int argc, char* argv[])
 {
@@ -38,7 +38,10 @@ int main(int argc, char* argv[])
 				showUsage(argv[0]);
 				break;
 			case 'm':
-				if (strcmp("single", optarg)) { mode = Mode::dump_all; }
+				if (!strcmp("single", optarg)) mode = Mode::single;
+				else if (!strcmp("dump_all", optarg)) mode = Mode::dump_all;
+				else if (!strcmp("probe_standard", optarg)) mode = Mode::probe_standard;
+				else { std::cerr << "Unknown mode.\n"; showUsage(argv[0]); }
 				break;
 			case 't':
 				txidHexString = std::string(optarg);
@@ -67,6 +70,10 @@ int main(int argc, char* argv[])
 	
 	if (mode == Mode::dump_all) {
 	       	db.printAllUTXOs();
+		return EXIT_SUCCESS;
+	}
+	if (mode == Mode::probe_standard) {
+		db.printFirstStandardUTXOs(10);
 		return EXIT_SUCCESS;
 	}
 	
